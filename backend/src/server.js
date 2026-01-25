@@ -50,6 +50,14 @@ const authRoutes = require('./routes/auth.routes');
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/auth', authRoutes);
 
+app.get('/api/health', (req, res) => {
+    res.json({
+        status: 'online',
+        timestamp: new Date(),
+        message: 'Smart Attendance System API is healthy'
+    });
+});
+
 app.get('/', (req, res) => {
     res.send('Smart Attendance System API (WebSocket Edition) is running...');
 });
@@ -57,3 +65,5 @@ app.get('/', (req, res) => {
 server.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
 });
+
+module.exports = app;
