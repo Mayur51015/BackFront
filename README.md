@@ -5,6 +5,7 @@ A production-ready, energy-efficient attendance tracking system designed for aca
 ## 🚀 Key Features
 - **Geo-fenced Verification**: Server-side GPS validation using the **Haversine Formula**.
 - **Bio-Identity**: Live face capture requirement for attendance marking.
+- **Real-time Synchronization**: Instant attendance updates via **Socket.io** Relay Hub.
 - **Teacher Override**: Manual attendance marking with mandatory audit logging.
 - **Green Coding**: Optimized for low energy consumption and minimal network calls.
 - **Glassmorphic UI**: Ultra-modern design with smooth transitions and blur effects.
@@ -12,65 +13,52 @@ A production-ready, energy-efficient attendance tracking system designed for aca
 ---
 
 ## 🛠️ Tech Stack
-- **Frontend**: React 18 (Vite), Tailwind CSS, Axios, Lucide Icons, React-Webcam.
-- **Backend**: Node.js, Express, Multer (File Handling).
-- **Database/Auth**: Firebase Firestore, Firebase Authentication, Firebase Storage.
+- **Frontend**: React 19 (Vite), Tailwind CSS 4, Axios, Lucide Icons, React-Webcam, Socket.io-client.
+- **Backend**: Node.js, Express 5, Mongoose, Socket.io, Multer, JWT.
+- **Database**: MongoDB (Local or Atlas).
 
 ---
 
 ## 🏗️ Technical Architecture & Design Choices
 
+Detailed architectural decisions are documented in [ARCHITECTURE.md](file:///c:/Users/mayur/OneDrive/Desktop/attendance_system/ARCHITECTURE.md).
+
 ### 1. Haversine Formula (GPS Verification)
-**Why?** Euclidean distance (straight line on a flat plane) is inaccurate for spherical surfaces like Earth. Haversine accounts for Earth's curvature, providing precise meter-level accuracy for classroom-scale geo-fencing.
-- **Time Complexity**: O(1)
-- **Trade-off**: Slightly higher computational cost than simplified distance formulas, but essential for security.
+Precise meter-level accuracy for classroom-scale geo-fencing by accounting for Earth's curvature.
 
 ### 2. Green Coding Principles
-Implemented throughout the stack to reduce the system's carbon footprint:
-- **Lazy Loading**: Major modules (Teacher/Student dashboards) are loaded only when needed, reducing initial energy consumed in data transfer and browser parsing.
-- **Single GPS Fetch**: GPS sensors are battery-intensive. The system fetches location once and caches it for the session instead of continuous polling.
-- **Firestore Batching**: Reduces the number of network round-trips.
-
-### 3. Security & Anti-Spoofing
-- **Server-side Validation**: Coordinates are never trusted from the client alone; the distance calculation happens on the secure server.
-- **Audit Logs**: Every manual intervention by a teacher is logged with a timestamp and reason, preventing undocumented changes to academic records.
-- **Face Capture**: Forces presence via biometric visual record.
-
----
-
-## 📚 Viva / Interview Preparation
-
-| Question | Answer / Analogy |
-| :--- | :--- |
-| **Why use Firebase?** | Analogy: Like renting a fully serviced apartment (Firebase) instead of building a house from scratch (Self-hosted server). It provides built-in Auth, DB, and Scaling. |
-| **What is a "Middleman" in your API?** | These are Express Middlewares (like `multer` or `auth`). Analogy: A security guard checking IDs at the door before letting someone into the VIP area. |
-| **How do you handle expired sessions?** | Each session has an `expiresAt` timestamp in Firestore. The server rejects any `mark` request where `Date.now() > expiresAt`. |
-| **Alternative to Face Capture?** | BLE Beacons or Fingerprint scanners. Trade-off: Require specialized hardware, whereas Face Capture works on any smartphone. |
+- **Lazy Loading**: Major modules are loaded only when needed.
+- **Single GPS Fetch**: Minimizes battery-draining polling.
+- **Socket.io**: Reduces overhead for real-time status updates.
 
 ---
 
 ## ⚙️ Setup Instructions
 
-### 1. Firebase Setup
-1. Create a project in [Firebase Console](https://console.firebase.google.com/).
-2. Enable Firestore, Auth, and Storage.
-3. Generate a **Service Account Key** (Project Settings > Service Accounts).
-4. Save it as `backend/serviceAccountKey.json`.
+### 1. Prerequisites
+- Node.js (v18+)
+- MongoDB (Running locally or a MongoDB Atlas URI)
 
-### 2. Backend
-```bash
-cd backend
-npm install
-# Ensure serviceAccountKey.json is present
-node src/server.js
-```
+### 2. Backend Setup
+1. `cd backend`
+2. `npm install`
+3. Create a `.env` file:
+   ```env
+   PORT=5000
+   MONGO_URI=your_mongodb_connection_string
+   JWT_SECRET=your_jwt_secret
+   UPLOAD_PATH=uploads
+   ```
+4. `npm start`
 
-### 3. Frontend
-```bash
-cd frontend
-npm install
-npm run dev
-```
+### 3. Frontend Setup
+1. `cd frontend`
+2. `npm install`
+3. Create a `.env` file:
+   ```env
+   VITE_API_URL=http://localhost:5000
+   ```
+4. `npm run dev`
 
 ---
 
@@ -78,13 +66,22 @@ npm run dev
 ```text
 ├── backend/
 │   ├── src/
-│   │   ├── routes/      # API definitions (Attendance, Auth)
-│   │   ├── services/    # Firebase Admin initialization
-│   │   └── utils/       # Haversine & Geo logic
+│   │   ├── config/      # Database connection
+│   │   ├── middleware/  # Auth & File processing
+│   │   ├── models/      # Mongoose Schemas
+│   │   ├── routes/      # REST API Endpoints
+│   │   ├── utils/       # Haversine & Geo logic
+│   │   └── server.js    # Entry point & Hub
 ├── frontend/
 │   ├── src/
-│   │   ├── components/  # Reusable UI (FaceCapture)
-│   │   ├── pages/       # Portal views (Teacher/Student)
-│   │   └── index.css    # Glassmorphic Design System
+│   │   ├── components/  # Shared components
+│   │   ├── contexts/    # State providers
+│   │   ├── pages/       # Portal views
+│   │   └── services/    # API abstraction
 └── README.md
 ```
+
+## 📄 Additional Documentation
+- [Core Concepts & Green Coding](file:///c:/Users/mayur/OneDrive/Desktop/attendance_system/CONCEPTS.md)
+- [Architecture Details](file:///c:/Users/mayur/OneDrive/Desktop/attendance_system/ARCHITECTURE.md)
+- [API Reference](file:///c:/Users/mayur/OneDrive/Desktop/attendance_system/API_DOCS.md)
